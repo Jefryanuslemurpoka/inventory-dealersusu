@@ -2,18 +2,28 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\BarangController;
 
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+// Redirect root ke login
+Route::get('/', function () {
+    return redirect('/login');
+});
 
+// Route untuk login (guest)
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
+
+// Route untuk logout
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Route yang butuh authentication
 Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    // Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     
-    Route::get('/produk', function () {
-        return view('produk');
-    })->name('produk');
-    
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    // CRUD Barang
+    Route::resource('barang', BarangController::class);
 });
